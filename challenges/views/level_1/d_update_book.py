@@ -13,8 +13,12 @@ from challenges.models import Book
 
 
 def update_book(book_id: int, new_title: str, new_author_full_name: str, new_isbn: str) -> Book | None:
-    # код писать тут
-    pass
+    Book.objects.filter(id=book_id).update(title=new_title, author_full_name=new_author_full_name, isbn=new_isbn)
+
+    try:
+        return Book.objects.get(id=book_id)
+    except Book.DoesNotExist:
+        return None
 
 
 def update_book_handler(request: HttpRequest, book_id: int) -> HttpResponse:
@@ -29,9 +33,12 @@ def update_book_handler(request: HttpRequest, book_id: int) -> HttpResponse:
     if book is None:
         return HttpResponseBadRequest()
 
-    return JsonResponse({
-        "id": book.pk,
-        "title": book.title,
-        "author_full_name": book.author_full_name,
-        "isbn": book.isbn,
-    })
+    return JsonResponse(
+        {
+            "id": book.pk,
+            "title": book.title,
+            "author_full_name": book.author_full_name,
+            "isbn": book.isbn,
+        },
+        json_dumps_params={'ensure_ascii': False},
+    )
