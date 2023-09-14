@@ -15,8 +15,10 @@ from challenges.models import Book
 
 
 def get_book(book_id: int) -> Book | None:
-    # код писать тут
-    pass
+    try:
+        return Book.objects.get(id=book_id)
+    except Book.DoesNotExist:
+        return None
 
 
 def book_details_handler(request: HttpRequest, book_id: int) -> HttpResponse:
@@ -25,9 +27,12 @@ def book_details_handler(request: HttpRequest, book_id: int) -> HttpResponse:
     if book is None:
         return HttpResponseNotFound()
 
-    return JsonResponse({
-        "id": book.pk,
-        "title": book.title,
-        "author_full_name": book.author_full_name,
-        "isbn": book.isbn,
-    })
+    return JsonResponse(
+        {
+            "id": book.pk,
+            "title": book.title,
+            "author_full_name": book.author_full_name,
+            "isbn": book.isbn,
+        },
+        json_dumps_params={'ensure_ascii': False},
+    )
