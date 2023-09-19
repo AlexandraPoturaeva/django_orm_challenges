@@ -19,6 +19,8 @@ def update_book(book_id: int, new_title: str, new_author_full_name: str, new_isb
         return None
 
     book.title, book.author_full_name, book.isbn = new_title, new_author_full_name, new_isbn
+    book.save()
+
     return book
 
 
