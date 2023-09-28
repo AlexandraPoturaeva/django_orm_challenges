@@ -65,3 +65,67 @@ class Laptop(models.Model):
             "created_at": self.created_at,
             "updated_at": self.updated_at,
         }
+
+
+class PostJson(TypedDict):
+    id: int
+    title: str
+    text: str
+    author_name: str
+    status: str
+    category: str
+    published_at: datetime
+    created_at: datetime
+    updated_at: datetime
+
+
+class Post(models.Model):
+    class Meta:
+        get_latest_by = 'created_at'
+        ordering = ["-published_at"]
+
+    title = models.CharField(max_length=256)
+    text = models.TextField()
+    author_name = models.CharField(max_length=256)
+    status = models.CharField(
+        max_length=10,
+        choices=[
+            ("P", "published"),
+            ("NP", 'not published'),
+            ('B', 'banned'),
+        ],
+    )
+    category = models.CharField(
+        max_length=10,
+        choices=[
+            ("H", "Hobby"),
+            ("W", 'Work'),
+            ('F', 'Family'),
+            ('ND', 'Not defined')
+        ],
+    )
+    published_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return f'id: {self.pk}, ' \
+               f'title: {self.title}, ' \
+               f'text: {self.text[:10]}, ' \
+               f'author_name: {self.author_name}, ' \
+               f'status: {self.status}, ' \
+               f'category: {self.category}, ' \
+               f'published_at: {self.published_at}'
+
+    def to_json(self) -> PostJson:
+        return {
+            "id": self.pk,
+            "title": self.title,
+            "text": self.text,
+            "author_name": self.author_name,
+            "status": self.status,
+            "category": self.category,
+            "published_at": self.published_at,
+            "created_at": self.created_at,
+            "updated_at": self.updated_at,
+        }
