@@ -13,7 +13,7 @@
 """
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from challenges.models import Laptop
-from challenges.views.level_2.utils import convert_query_result_to_jsonresponse, valid_brand, valid_min_price
+from challenges.views.level_2.utils import convert_queryset_to_jsonresponse, convert_model_obj_to_jsonresponse, valid_brand, valid_min_price, jsonresponse_403, jsonresponse_404
 
 
 def laptop_details_view(request: HttpRequest, laptop_id: int) -> JsonResponse:
@@ -23,7 +23,7 @@ def laptop_details_view(request: HttpRequest, laptop_id: int) -> JsonResponse:
     """
     laptop = Laptop.objects.filter(id=laptop_id).first()
 
-    return convert_query_result_to_jsonresponse(query_result=laptop)
+    return convert_model_obj_to_jsonresponse(query_result=laptop)
 
 
 def laptop_in_stock_list_view(request: HttpRequest) -> JsonResponse:
@@ -33,10 +33,10 @@ def laptop_in_stock_list_view(request: HttpRequest) -> JsonResponse:
     """
     laptops = Laptop.objects.filter(stock_amount__gt=0).order_by('-created_at')
 
-    return convert_query_result_to_jsonresponse(query_result=laptops)
+    return convert_queryset_to_jsonresponse(query_result=laptops)
 
 
-def laptop_filter_view(request: HttpRequest) -> HttpResponse | JsonResponse:
+def laptop_filter_view(request: HttpRequest) -> JsonResponse:
     """
     В этой вьюхе вам нужно вернуть список ноутбуков с указанным брендом и указанной минимальной ценой.
     Бренд и цену возьмите из get-параметров с названиями brand и min_price.
@@ -50,13 +50,13 @@ def laptop_filter_view(request: HttpRequest) -> HttpResponse | JsonResponse:
     brand = valid_brand(brand)
 
     if not min_price and brand:
-        return HttpResponse(status=403)
+        return jsonresponse_403()
 
     laptops = Laptop.objects.filter(brand=brand, price_rub__lte=min_price)
-    return convert_query_result_to_jsonresponse(query_result=laptops)
+    return convert_queryset_to_jsonresponse(query_result=laptops)
 
 
-def last_laptop_details_view(request: HttpRequest) -> HttpResponse | JsonResponse:
+def last_laptop_details_view(request: HttpRequest) -> JsonResponse:
     """
     В этой вьюхе вам нужно вернуть json-описание последнего созданного ноутбука.
     Если ноутбуков нет вообще, вернуть 404.
@@ -64,6 +64,6 @@ def last_laptop_details_view(request: HttpRequest) -> HttpResponse | JsonRespons
     try:
         last_laptop = Laptop.objects.latest()
     except Laptop.DoesNotExist:
-        return HttpResponse(status=404)
+        return jsonresponse_404()
 
-    return convert_query_result_to_jsonresponse(query_result=last_laptop)
+    return convert_model_obj_to_jsonresponse(query_result=last_laptop)

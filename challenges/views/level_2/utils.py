@@ -19,28 +19,37 @@ def valid_brand(brand: str | None) -> str | None:
     return possible_brands_dict.get(brand.capitalize(), None)
 
 
-def convert_query_result_to_jsonresponse(query_result: Model | QuerySet | None) -> JsonResponse:
-    if query_result is None or not query_result.exists():
-        data = {'data': {}, 'errors': 'Page not found'}
-        status = 404
+def jsonresponse_403():
+    data = {'data': {}, 'errors': 'invalid params values'}
+    return JsonResponse(data=data, status=404)
 
-    else:
-        status = 200
-        if type(query_result) == Model:
-            objects_data = query_result.to_json()
 
-        else:
-            objects_data = [object.to_json() for object in query_result]
+def jsonresponse_404():
+    data = {'data': {}, 'errors': 'not found'}
+    return JsonResponse(data=data, status=404)
 
-        data = {'data': objects_data}
 
-    return JsonResponse(data=data, status=status)
+def convert_queryset_to_jsonresponse(query_result: QuerySet):
+    if not query_result:
+        return jsonresponse_404()
+
+    objects_data = [object.to_json() for object in query_result]
+    data = {'data': objects_data}
+    return JsonResponse(data=data, status=200)
+
+
+def convert_model_obj_to_jsonresponse(query_result: Model | None) -> JsonResponse:
+    if query_result is None:
+        return jsonresponse_404()
+
+    object_data = query_result.to_json()
+    data = {'data': object_data}
+    return JsonResponse(data=data, status=200)
 
 
 def valid_post_categories(query_categories: str) -> list:
     query_categories = list(map(lambda x: x.capitalize(), query_categories.split(',')))
     possible_categories = {cat[1]: cat[0] for cat in Post.category.field.choices}
-
     return [possible_categories.get(cat) for cat in query_categories if possible_categories.get(cat)]
 
 
