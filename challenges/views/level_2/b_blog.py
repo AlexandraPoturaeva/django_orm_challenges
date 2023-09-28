@@ -53,7 +53,7 @@ def categories_posts_list_view(request: HttpRequest) -> HttpResponse | JsonRespo
     Возьмите get-параметр categories, в нём разделённый запятой список выбранных категорий.
     """
     query_categories = request.GET.get('categories')
-    print(query_categories)
+
     if query_categories:
         valid_query_categories = valid_post_categories(query_categories)
     else:
