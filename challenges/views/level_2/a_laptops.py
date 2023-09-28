@@ -11,42 +11,9 @@
 - реализовать у модели метод to_json, который будет преобразовывать объект книги в json-сериализуемый словарь
 - по очереди реализовать каждую из вьюх в этом файле, проверяя правильность их работу в браузере
 """
-from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from challenges.models import Laptop
-
-
-def valid_min_price(min_price: str | None) -> int | None:
-    try:
-        min_price = int(min_price)
-    except (ValueError, TypeError):
-        return None
-
-    return min_price if min_price >= 0 else None
-
-
-def valid_brand(brand: str | None) -> bool:
-    possible_brands_dict = {brand[1]: brand[0] for brand in Laptop.brand.field.choices}
-
-    return possible_brands_dict.get(brand, None)
-
-
-def convert_query_result_to_jsonresponse(query_result: Laptop | QuerySet | None) -> JsonResponse:
-    if query_result is None:
-        data = {'data': {}, 'errors': 'Page not found'}
-        status = 404
-
-    else:
-        status = 200
-        if type(query_result) == Laptop:
-            objects_data = query_result.to_json()
-
-        else:
-            objects_data = [object.to_json() for object in query_result]
-
-        data = {'data': objects_data}
-
-    return JsonResponse(data=data, status=status)
+from challenges.views.level_2.utils import convert_query_result_to_jsonresponse, valid_brand, valid_min_price
 
 
 def laptop_details_view(request: HttpRequest, laptop_id: int) -> JsonResponse:
