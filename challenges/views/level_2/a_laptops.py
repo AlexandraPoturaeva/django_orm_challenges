@@ -11,9 +11,11 @@
 - реализовать у модели метод to_json, который будет преобразовывать объект книги в json-сериализуемый словарь
 - по очереди реализовать каждую из вьюх в этом файле, проверяя правильность их работу в браузере
 """
-from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.http import HttpRequest, JsonResponse
 from challenges.models import Laptop
-from challenges.views.level_2.utils import convert_queryset_to_jsonresponse, convert_model_obj_to_jsonresponse, valid_brand, valid_min_price, jsonresponse_403, jsonresponse_404
+from challenges.views.level_2.services.converters_to_jsonresponse import convert_queryset_to_jsonresponse, \
+    convert_model_obj_to_jsonresponse, jsonresponse_403, jsonresponse_404
+from challenges.views.level_2.services.validators import validate_brand, validate_min_price
 
 
 def laptop_details_view(request: HttpRequest, laptop_id: int) -> JsonResponse:
@@ -43,16 +45,16 @@ def laptop_filter_view(request: HttpRequest) -> JsonResponse:
     Если бренд не входит в список доступных у вас на сайте или если цена отрицательная, верните 403.
     Отсортируйте ноутбуки по цене, сначала самый дешевый.
     """
-    brand = request.GET.get('brand')
-    min_price = request.GET.get('price')
+    raw_brand = request.GET.get('brand')
+    raw_min_price = request.GET.get('price')
 
-    min_price = valid_min_price(min_price)
-    brand = valid_brand(brand)
+    min_price = validate_min_price(raw_min_price)
+    brand = validate_brand(raw_brand)
 
     if not min_price and brand:
         return jsonresponse_403()
 
-    laptops = Laptop.objects.filter(brand=brand, price_rub__lte=min_price)
+    laptops = Laptop.objects.filter(brand=brand, price_rub__gte=min_price)
     return convert_queryset_to_jsonresponse(query_result=laptops)
 
 

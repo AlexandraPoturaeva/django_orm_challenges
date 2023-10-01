@@ -13,7 +13,8 @@ from datetime import datetime, timedelta
 from django.http import HttpRequest, JsonResponse
 
 from challenges.models import Post
-from challenges.views.level_2.utils import convert_queryset_to_jsonresponse, convert_model_obj_to_jsonresponse, valid_post_categories, valid_last_days, jsonresponse_403
+from challenges.views.level_2.services.converters_to_jsonresponse import convert_queryset_to_jsonresponse, jsonresponse_403
+from challenges.views.level_2.services.validators import validate_post_categories, validate_last_days
 
 
 def last_posts_list_view(request: HttpRequest) -> JsonResponse:
@@ -52,14 +53,14 @@ def categories_posts_list_view(request: HttpRequest) -> JsonResponse:
     В этой вьюхе вам нужно вернуть все посты все посты, категория которых принадлежит одной из указанных.
     Возьмите get-параметр categories, в нём разделённый запятой список выбранных категорий.
     """
-    query_categories = request.GET.get('categories')
+    raw_query_categories = request.GET.get('categories')
 
-    if query_categories:
-        valid_query_categories = valid_post_categories(query_categories)
+    if raw_query_categories:
+        query_categories = validate_post_categories(raw_query_categories)
     else:
         return jsonresponse_403()
 
-    query_result = Post.objects.filter(category__in=valid_query_categories)
+    query_result = Post.objects.filter(category__in=query_categories)
     return convert_queryset_to_jsonresponse(query_result=query_result)
 
 
@@ -68,8 +69,8 @@ def last_days_posts_list_view(request: HttpRequest) -> JsonResponse:
     В этой вьюхе вам нужно вернуть посты, опубликованные за последние last_days дней.
     Значение last_days возьмите из соответствующего get-параметра.
     """
-    last_days = request.GET.get('last_days')
-    last_days = valid_last_days(last_days)
+    raw_last_days = request.GET.get('last_days')
+    last_days = validate_last_days(raw_last_days)
 
     if not last_days:
         return jsonresponse_403()
