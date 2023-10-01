@@ -43,7 +43,7 @@ def untagged_posts_list_view(request: HttpRequest) -> JsonResponse:
     """
     В этой вьюхе вам нужно вернуть все посты без категории, отсортируйте их по автору и дате создания.
     """
-    untagged_posts = Post.objects.filter(category='ND').order_by('author_name', '-created_at')
+    untagged_posts = Post.objects.filter(category__isnull=True).order_by('author_name', '-created_at')
     return convert_queryset_to_jsonresponse(query_result=untagged_posts)
 
 
