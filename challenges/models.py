@@ -73,7 +73,7 @@ class PostJson(TypedDict):
     text: str
     author_name: str
     status: str
-    category: str
+    category: str | None
     published_at: datetime
     created_at: datetime
     updated_at: datetime
@@ -101,8 +101,8 @@ class Post(models.Model):
             ("H", "Hobby"),
             ("W", 'Work'),
             ('F', 'Family'),
-            ('ND', 'Not defined')
         ],
+        null=True,
     )
     published_at = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
